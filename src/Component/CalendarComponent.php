@@ -38,6 +38,7 @@ class CalendarComponent
     #[LiveProp]
     public string $viewMode = 'month';
 
+    /** @var array<string, list<CalendarEvent>>|null */
     private ?array $eventMemo = null;
 
     public function __construct(
@@ -85,22 +86,25 @@ class CalendarComponent
         return $events[$date->format('Y-m-d')] ?? [];
     }
 
+    /**
+     * @return list<array{ event: CalendarEvent, height: int, top: int }>
+     */
     public function getEventsWeekView(DateTime $date): array
     {
         $events = [];
         foreach ($this->getEvents($date) as $event) {
-            $top = (int)$event->getStart()->format('G') * 60 + (int)$event->getStart()->format('i');
-            $top = floor($top * self::MINUTE_HEIGHT);
+            $top = $event->getStart()->format('G') * 60 + (int)$event->getStart()->format('i');
+            $top = (int)floor($top * self::MINUTE_HEIGHT);
 
             $heightDiff = $event->getEnd() !== null
                 ? $event->getEnd()->diff($event->getStart(), true)
                 : new DateInterval('PT1H');
-            $height = floor(($heightDiff->h * 60 + $heightDiff->i) * self::MINUTE_HEIGHT);
+            $height = (int)floor(($heightDiff->h * 60 + $heightDiff->i) * self::MINUTE_HEIGHT);
 
             $events[] = [
-                'top' => $top,
-                'height' => $height,
                 'event' => $event,
+                'height' => $height,
+                'top' => $top,
             ];
         }
         return $events;
@@ -175,9 +179,10 @@ class CalendarComponent
 
         $this->eventMemo = [];
         foreach ($allEvents as $event) {
-            $this->insertEventsWithRecurrence($event, $start, $end, $this->eventMemo);
+            $this->insertEventsWithRecurrence($event, $start, $end);
         }
 
+        assert($this->eventMemo !== null);
         foreach ($this->eventMemo as &$dayEvents) {
             uasort($dayEvents, fn (
                 CalendarEvent $a,
@@ -188,19 +193,14 @@ class CalendarComponent
         return $this->eventMemo;
     }
 
-    /**
-     * @param array<string, array<CalendarEvent>> $allEvents
-     * @param-out array<string, array<CalendarEvent>> $allEvents
-     */
     private function insertEventsWithRecurrence(
         CalendarEvent $event,
         DateTime $start,
         DateTime $end,
-        array &$allEvents,
     ): void {
         $eventStart = clone $event->getStart();
         if ($event->getRepeat() === null) {
-            $allEvents[$eventStart->format('Y-m-d')][] = $event;
+            $this->eventMemo[$eventStart->format('Y-m-d')][] = $event;
             return;
         }
 
@@ -225,7 +225,7 @@ class CalendarComponent
                     $event->setEnd((clone $eventStart)->add($eventDuration));
                 }
 
-                $allEvents[$eventStart->format('Y-m-d')][] = $event;
+                $this->eventMemo[$eventStart->format('Y-m-d')][] = $event;
             }
 
             switch ($event->getRepeat()) {

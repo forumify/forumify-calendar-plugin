@@ -31,9 +31,9 @@ class CalendarTable extends AbstractDoctrineTable
             ->addColumn('actions', [
                 'field' => 'id',
                 'label' => '',
-                'sortable' => false,
-                'searchable' => false,
                 'renderer' => $this->renderActions(...),
+                'searchable' => false,
+                'sortable' => false,
             ])
         ;
     }

@@ -22,6 +22,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/**
+ * @extends AbstractType<CalendarEvent>
+ */
 class EventType extends AbstractType
 {
     public function __construct(
@@ -45,42 +48,38 @@ class EventType extends AbstractType
 
         $builder
             ->add('calendar', EntityType::class, [
-                'placeholder' => 'Select a calendar',
                 'autocomplete' => true,
-                'class' => Calendar::class,
                 'choice_label' => 'title',
+                'class' => Calendar::class,
+                'placeholder' => 'Select a calendar',
                 'query_builder' => $this->calendarRepository->getManageableCalendarsQuery(),
             ])
             ->add('start', DateTimeType::class, [
-                'widget' => 'single_text',
                 'view_timezone' => $user?->getTimezone() ?? 'UTC',
+                'widget' => 'single_text',
             ])
             ->add('end', DateTimeType::class, [
                 'required' => false,
-                'widget' => 'single_text',
                 'view_timezone' => $user?->getTimezone() ?? 'UTC',
+                'widget' => 'single_text',
             ])
             ->add('repeat', ChoiceType::class, [
-                'required' => false,
-                'placeholder' => 'Never',
                 'choices' => [
-                    'Daily' => 'daily',
-                    'Weekly' => 'weekly',
-                    'Monthly' => 'monthly',
                     'Annually' => 'annually',
+                    'Daily' => 'daily',
+                    'Monthly' => 'monthly',
+                    'Weekly' => 'weekly',
                 ],
+                'placeholder' => 'Never',
+                'required' => false,
             ])
             ->add('repeatEnd', DateType::class, [
-                'required' => false,
                 'help' => 'When to stop repeating the event',
+                'required' => false,
                 'widget' => 'single_text',
             ])
             ->add('title', TextType::class)
             ->add('newBanner', FileType::class, [
-                'mapped' => false,
-                'required' => false,
-                'label' => 'Banner',
-                'help' => 'Maximum 2MB, recommended is a landscape image with max width of 800px.',
                 'attr' => [
                     'preview' => ($banner = $options['data']->getBanner() ?? null)
                         ? $this->packages->getUrl($banner, 'forumify.asset')
@@ -89,10 +88,14 @@ class EventType extends AbstractType
                 'constraints' => [
                     new Assert\Image(maxSize: '2M'),
                 ],
+                'help' => 'Maximum 2MB, recommended is a landscape image with max width of 800px.',
+                'label' => 'Banner',
+                'mapped' => false,
+                'required' => false,
             ])
             ->add('content', RichTextEditorType::class, [
-                'required' => false,
                 'empty_data' => '',
+                'required' => false,
             ])
         ;
     }

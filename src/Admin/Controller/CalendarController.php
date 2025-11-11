@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Forumify\Calendar\Admin\Controller;
 
 use Forumify\Admin\Crud\AbstractCrudController;
-use Forumify\Admin\Form\CalendarType;
+use Forumify\Calendar\Admin\Form\CalendarType;
 use Forumify\Calendar\Entity\Calendar;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * @extends AbstractCrudController<Calendar>
+ */
 #[Route('/calendars', 'calendars')]
 class CalendarController extends AbstractCrudController
 {

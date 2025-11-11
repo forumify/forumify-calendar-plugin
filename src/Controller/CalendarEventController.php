@@ -81,9 +81,9 @@ class CalendarEventController extends AbstractController
         $form->handleRequest($request);
         if (!$form->isSubmitted() || !$form->isValid()) {
             return $this->render('@Forumify/form/simple_form_page.html.twig', [
+                'cancelPath' =>$this->generateUrl('forumify_calendar_all'),
                 'form' => $form->createView(),
                 'title' => $isNew ? 'calendar.event.create' : 'calendar.event.edit',
-                'cancelPath' =>$this->generateUrl('forumify_calendar_all'),
             ]);
         }
 
