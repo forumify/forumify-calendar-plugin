@@ -1,0 +1,34 @@
+{
+    "name": "forumify/forumify-calendar-plugin",
+    "description": "Calendar plugin for forumify",
+    "type": "forumify-plugin",
+    "keywords": ["symfony-ux"],
+    "license": "OSL-3.0",
+    "require": {
+        "forumify/forumify-platform": "1.0.x-dev"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.1",
+        "squizlabs/php_codesniffer": "^3.13",
+        "phpstan/phpstan-symfony": "^2.0",
+        "slevomat/coding-standard": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Forumify\\Calendar\\": "src/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/flex": false,
+            "symfony/runtime": false,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "extra": {
+        "forumify-plugin-class": "Forumify\\Calendar\\ForumifyCalendarPlugin",
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
