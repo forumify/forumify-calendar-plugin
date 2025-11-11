@@ -1,0 +1,9 @@
+doctrine:
+    orm:
+        mappings:
+            calendar:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/vendor/forumify/forumify-calendar-plugin/src/Entity'
+                prefix: Forumify\Calendar\Entity
+                alias: CalendarEntity

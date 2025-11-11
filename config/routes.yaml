@@ -1,0 +1,11 @@
+calendar_admin:
+    resource: ../src/Admin/Controller
+    type: attribute
+    name_prefix: forumify_admin_
+    prefix: admin/
+
+calendar:
+    resource: ../src/Controller
+    type: attribute
+    name_prefix: forumify_calendar_
+    prefix: calendar

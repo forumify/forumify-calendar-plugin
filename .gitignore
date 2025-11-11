@@ -4,8 +4,6 @@ composer.lock
 assets/node_modules
 assets/package-lock.json
 
-public/styles
-
 .phpcs-cache
 coverage/
 .phpunit.*

@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CalendarController extends AbstractController
 {
-    #[Route('{slug?}', name: 'all')]
+    #[Route('{slug:calendar?}', name: 'all')]
     public function __invoke(?Calendar $calendar): Response
     {
         if ($calendar !== null) {
@@ -22,7 +22,7 @@ class CalendarController extends AbstractController
             ]);
         }
 
-        return $this->render('@Forumify/frontend/calendar/calendar.html.twig', [
+        return $this->render('@ForumifyCalendarPlugin/frontend/calendar/calendar.html.twig', [
             'calendar' => $calendar,
         ]);
     }

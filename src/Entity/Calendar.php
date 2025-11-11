@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Forumify\Calendar\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,23 +13,27 @@ use Forumify\Core\Entity\AccessControlledEntityInterface;
 use Forumify\Core\Entity\ACLParameters;
 use Forumify\Core\Entity\IdentifiableEntityTrait;
 use Forumify\Core\Entity\SluggableEntityTrait;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CalendarRepository::class)]
+#[ApiResource]
 class Calendar implements AccessControlledEntityInterface
 {
     use IdentifiableEntityTrait;
     use SluggableEntityTrait;
 
-    #[ORM\Column]
+    #[ORM\Column(length: 255)]
+    #[Groups('Calendar')]
     private string $title;
 
-    #[ORM\Column]
+    #[ORM\Column(length: 7, options: ['fixed' => true])]
+    #[Groups('Calendar')]
     private string $color;
 
     /**
      * @var Collection<int, CalendarEvent>
      */
-    #[ORM\OneToMany('calendar', CalendarEvent::class, ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'calendar', targetEntity: CalendarEvent::class, cascade: ['persist', 'remove'])]
     private Collection $events;
 
     public function __construct()

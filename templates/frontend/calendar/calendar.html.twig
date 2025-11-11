@@ -1,0 +1,9 @@
+{% extends '@Forumify/frontend/base.html.twig' %}
+{% block title_page %}{{ 'calendar.title'|trans }}{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('bundles/forumifycalendarplugin/styles/calendar.css') }}">
+{% endblock %}
+{% block body %}
+    {{ component('Forumify\\Calendar', { selectedCalendar: calendar }) }}
+{% endblock %}

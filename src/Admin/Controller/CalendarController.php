@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Forumify\Admin\Controller;
+namespace Forumify\Calendar\Admin\Controller;
 
 use Forumify\Admin\Crud\AbstractCrudController;
 use Forumify\Admin\Form\CalendarType;
