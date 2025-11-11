@@ -12,6 +12,7 @@ use Forumify\Calendar\Entity\CalendarEvent;
 use Forumify\Calendar\Repository\CalendarEventRepository;
 use Forumify\Calendar\Repository\CalendarRepository;
 use Forumify\Core\Entity\User;
+use Forumify\Core\Service\ACLService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -43,7 +44,7 @@ class CalendarComponent
 
     public function __construct(
         private readonly Security $security,
-        public readonly CalendarRepository $calendarRepository,
+        private readonly CalendarRepository $calendarRepository,
         private readonly CalendarEventRepository $calendarEventRepository,
     ) {
     }
@@ -51,6 +52,19 @@ class CalendarComponent
     public function mount(): void
     {
         $this->reset();
+    }
+
+    /**
+     * @return array<Calendar>
+     */
+    public function getVisibleCalendars(): array
+    {
+        return $this->calendarRepository->findAllVisibleCalendars();
+    }
+
+    public function showManageCalendarBtn(): bool
+    {
+        return $this->calendarRepository->countManageableCalendars() > 0;
     }
 
     private function reset(): void

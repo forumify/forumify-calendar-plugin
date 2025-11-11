@@ -12,7 +12,7 @@
                     <i class="ph ph-calendar-dots"></i>Month
                 {% endif %}
             </button>
-            {% if this.calendarRepository.countManageableCalendars > 0 %}
+            {% if this.showManageCalendarBtn %}
                 <a class="btn-primary" href="{{ path('forumify_calendar_event_create', { calendar: this.selectedCalendar }) }}">
                     <i class="ph ph-plus"></i>
                     {{ 'calendar.event.create'|trans }}

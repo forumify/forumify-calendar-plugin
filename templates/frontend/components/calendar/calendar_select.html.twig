@@ -17,7 +17,7 @@
                 {{ 'calendar.all_calendars'|trans }}
             </a>
         {% endif %}
-        {% for calendar in this.calendarRepository.findAllVisibleCalendars %}
+        {% for calendar in this.visibleCalendars %}
             <a class="btn-link" href="{{ path('forumify_calendar_all', { slug: calendar.slug }) }}">
                 <i class="dot" style="background-color: {{ calendar.color }}"></i>
                 {{ calendar.title }}
