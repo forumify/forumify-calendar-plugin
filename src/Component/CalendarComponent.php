@@ -12,7 +12,6 @@ use Forumify\Calendar\Entity\CalendarEvent;
 use Forumify\Calendar\Repository\CalendarEventRepository;
 use Forumify\Calendar\Repository\CalendarRepository;
 use Forumify\Core\Entity\User;
-use Forumify\Core\Service\ACLService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
