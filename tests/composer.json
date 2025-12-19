@@ -1,6 +1,6 @@
 {
     "require": {
-        "forumify/forumify-platform": "1.0.x-dev",
+        "forumify/forumify-platform": "^1.0",
         "forumify/forumify-calendar-plugin": "@dev",
         "symfony/flex": "^2",
         "symfony/runtime": "7.3.*"
