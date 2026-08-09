@@ -5,8 +5,16 @@ declare(strict_types=1);
 namespace Forumify\Calendar\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\State\CreateProvider;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Forumify\Api\Entity\NewAsset;
 use Forumify\Api\Serializer\Attribute\Asset;
 use Forumify\Calendar\Repository\CalendarEventRepository;
 use Forumify\Core\Entity\BlameableEntityTrait;
@@ -16,7 +24,56 @@ use Forumify\Core\Entity\TimestampableEntityTrait;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CalendarEventRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    routePrefix: '/calendar',
+    operations: [
+        new Get(
+            extraProperties: ['acl' => [
+                'permission' => 'view',
+                'entity' => 'calendar',
+            ]],
+        ),
+        new GetCollection(
+            extraProperties: ['acl' => [
+                'permission' => 'view',
+                'entity' => 'calendar',
+            ]],
+        ),
+        new Patch(
+            extraProperties: ['acl' => [
+                'permission' => 'manage_events',
+                'entity' => 'calendar',
+            ]],
+        ),
+        new Delete(
+            extraProperties: ['acl' => [
+                'permission' => 'manage_events',
+                'entity' => 'calendar',
+            ]],
+        ),
+        new GetCollection(
+            uriTemplate: '/{calendarId}/events',
+            uriVariables: [
+                'calendarId' => new Link(fromClass: Calendar::class, toProperty: 'calendar'),
+            ],
+            extraProperties: ['acl' => [
+                'permission' => 'view',
+                'entity' => 'calendar',
+            ]],
+        ),
+        new Post(
+            uriTemplate: '/{calendarId}/events',
+            uriVariables: [
+                'calendarId' => new Link(
+                    fromClass: Calendar::class,
+                    toProperty: 'calendar',
+                    security: 'is_granted("ACCESS_CONTROL_LIST", {"permission": "manage_events", "entity": calendar})',
+                ),
+            ],
+            provider: CreateProvider::class,
+        ),
+    ],
+)]
 class CalendarEvent
 {
     use IdentifiableEntityTrait;
@@ -34,7 +91,7 @@ class CalendarEvent
 
     #[ORM\Column(type: 'datetime', nullable: true)]
     #[Groups('CalendarEvent')]
-    private ?DateTime $end;
+    private ?DateTime $end = null;
 
     #[ORM\Column('`repeat`', nullable: true)]
     #[Groups('CalendarEvent')]
@@ -50,11 +107,14 @@ class CalendarEvent
 
     #[ORM\Column(nullable: true)]
     #[Groups('CalendarEvent')]
-    #[Asset('forumify.asset')]
     private ?string $banner = null;
+
+    #[Asset('banner', 'forumify.asset', 'asset.storage')]
+    public ?NewAsset $newBanner = null;
 
     #[ORM\ManyToOne(targetEntity: Calendar::class, inversedBy: 'events')]
     #[ORM\JoinColumn(onDelete: 'CASCADE')]
+    #[Groups('CalendarEvent')]
     private Calendar $calendar;
 
     public function getStart(): DateTime

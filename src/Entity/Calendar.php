@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace Forumify\Calendar\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,7 +21,20 @@ use Forumify\Core\Entity\SluggableEntityTrait;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CalendarRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    routePrefix: '/calendar',
+    operations: [
+        new Get(
+            extraProperties: ['acl' => 'view'],
+        ),
+        new GetCollection(
+            extraProperties: ['acl' => 'view'],
+        ),
+        new Post(security: 'is_granted("calendar.admin.calendars.manage")'),
+        new Patch(security: 'is_granted("calendar.admin.calendars.manage")'),
+        new Delete(security: 'is_granted("calendar.admin.calendars.manage")'),
+    ],
+)]
 class Calendar implements AccessControlledEntityInterface
 {
     use IdentifiableEntityTrait;

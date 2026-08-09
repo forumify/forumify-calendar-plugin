@@ -51,4 +51,14 @@
             </div>
         </div>
     </div>
+    <p class="text-small text-light mt-2">
+        <i class="ph ph-clock"></i>
+        {{ 'calendar.timezone_notice'|trans({ timezone: this.timezone }) }}
+        {% if app.user is null %}
+            {%- set loginPath = path('forumify_core_login', {
+                '_target_path': path('forumify_calendar_all', this.selectedCalendar ? { slug: this.selectedCalendar.slug } : {}),
+            }) -%}
+            {{ 'calendar.timezone_notice_guest'|trans({ loginPath: loginPath })|raw }}
+        {% endif %}
+    </p>
 </div>

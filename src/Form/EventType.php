@@ -7,10 +7,9 @@ namespace Forumify\Calendar\Form;
 use Forumify\Calendar\Entity\Calendar;
 use Forumify\Calendar\Entity\CalendarEvent;
 use Forumify\Calendar\Repository\CalendarRepository;
-use Forumify\Core\Entity\User;
 use Forumify\Core\Form\RichTextEditorType;
+use Forumify\Core\Service\TimezoneResolver;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -29,7 +28,7 @@ class EventType extends AbstractType
 {
     public function __construct(
         private readonly CalendarRepository $calendarRepository,
-        private readonly Security $security,
+        private readonly TimezoneResolver $timezoneResolver,
         private readonly Packages $packages,
     ) {
     }
@@ -43,8 +42,7 @@ class EventType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        /** @var User|null $user */
-        $user = $this->security->getUser();
+        $timezone = $this->timezoneResolver->getTimezone()->getName();
 
         $builder
             ->add('calendar', EntityType::class, [
@@ -55,12 +53,12 @@ class EventType extends AbstractType
                 'query_builder' => $this->calendarRepository->getManageableCalendarsQuery(),
             ])
             ->add('start', DateTimeType::class, [
-                'view_timezone' => $user?->getTimezone() ?? 'UTC',
+                'view_timezone' => $timezone,
                 'widget' => 'single_text',
             ])
             ->add('end', DateTimeType::class, [
                 'required' => false,
-                'view_timezone' => $user?->getTimezone() ?? 'UTC',
+                'view_timezone' => $timezone,
                 'widget' => 'single_text',
             ])
             ->add('repeat', ChoiceType::class, [
