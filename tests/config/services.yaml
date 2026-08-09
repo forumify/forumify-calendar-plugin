@@ -5,7 +5,8 @@ services:
         autowire: true
         autoconfigure: true
 
-    PluginTests\:
+    PluginTests\Tests\:
         resource: '../Tests/'
         exclude:
-            - '../Tests/PluginTestKernel.php'
+            - '../Tests/Application/'
+            - '../Tests/Unit/'

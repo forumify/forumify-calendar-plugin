@@ -6,13 +6,11 @@ namespace Forumify\Calendar\Component;
 
 use DateInterval;
 use DateTime;
-use DateTimeZone;
 use Forumify\Calendar\Entity\Calendar;
 use Forumify\Calendar\Entity\CalendarEvent;
 use Forumify\Calendar\Repository\CalendarEventRepository;
 use Forumify\Calendar\Repository\CalendarRepository;
-use Forumify\Core\Entity\User;
-use Symfony\Bundle\SecurityBundle\Security;
+use Forumify\Core\Service\TimezoneResolver;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -42,10 +40,15 @@ class CalendarComponent
     private ?array $eventMemo = null;
 
     public function __construct(
-        private readonly Security $security,
+        private readonly TimezoneResolver $timezoneResolver,
         private readonly CalendarRepository $calendarRepository,
         private readonly CalendarEventRepository $calendarEventRepository,
     ) {
+    }
+
+    public function getTimezone(): string
+    {
+        return $this->timezoneResolver->getTimezone()->getName();
     }
 
     public function mount(): void
@@ -161,11 +164,7 @@ class CalendarComponent
 
     private function setTimezone(DateTime $date): void
     {
-        $user = $this->security->getUser();
-        if (!$user instanceof User) {
-            return;
-        }
-        $date->setTimezone(new DateTimeZone($user->getTimezone()));
+        $date->setTimezone($this->timezoneResolver->getTimezone());
     }
 
     /**

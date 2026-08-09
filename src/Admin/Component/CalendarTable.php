@@ -40,7 +40,7 @@ class CalendarTable extends AbstractDoctrineTable
 
     private function renderActions(int $id, Calendar $calendar): string
     {
-        if (!$this->security->isGranted('forumify.admin.settings.calendars.manage')) {
+        if (!$this->security->isGranted('calendar.admin.calendars.manage')) {
             return '';
         }
 

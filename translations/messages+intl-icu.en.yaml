@@ -1,0 +1,18 @@
+admin:
+    calendar:
+        crud:
+            single: 'calendar'
+            plural: 'calendars'
+calendar:
+    title: 'Calendar'
+    all_calendars: 'All Calendars'
+    timezone_notice: 'Times are shown in {timezone}.'
+    timezone_notice_guest: '<a href="{loginPath}">Log in</a> to see them in your own timezone.'
+    event:
+        edit: 'Edit Event'
+        until: 'until'
+        create: 'Create Event'
+        created: 'Event created.'
+        created_by: 'Event by'
+        delete: 'You are about to delete event "{event}".'
+        deleted: 'Event deleted.'
