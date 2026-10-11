@@ -2,6 +2,12 @@
     <div class="mb-4 flex justify-between">
         {% include '@ForumifyCalendarPlugin/frontend/components/calendar/calendar_select.html.twig' %}
         <div class="flex items-center gap-2">
+            {% if this.selectedCalendar is not null %}
+                {{ component('SubscribeButton', {
+                    entityId: this.selectedCalendar.id,
+                    subscriptionType: constant('Forumify\\Calendar\\Notification\\EventCreatedNotificationType::TYPE'),
+                }) }}
+            {% endif %}
             <button
                 class="btn-link"
                 {{ live_action('toggleViewMode') }}

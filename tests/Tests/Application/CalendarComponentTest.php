@@ -168,6 +168,26 @@ class CalendarComponentTest extends WebTestCase
         self::assertStringContainsString('Members Only', $render);
     }
 
+    public function testSubscribeButtonOnlyShowsForSelectedCalendar(): void
+    {
+        $calendar = CalendarFactory::createOne();
+        $user = $this->createSuperAdmin();
+
+        $crawler = $this->createLiveComponent('Forumify\Calendar', ['selectedCalendar' => $calendar])
+            ->actingAs($user)
+            ->render()
+            ->crawler();
+        $button = $crawler->filter('[data-live-name-value="SubscribeButton"]');
+        self::assertCount(1, $button);
+        self::assertStringContainsString('Subscribe', $button->text());
+
+        $crawler = $this->createLiveComponent('Forumify\Calendar')
+            ->actingAs($user)
+            ->render()
+            ->crawler();
+        self::assertCount(0, $crawler->filter('[data-live-name-value="SubscribeButton"]'));
+    }
+
     public function testTimezoneNoticeOnlyPromptsGuestsToLogIn(): void
     {
         $calendar = CalendarFactory::createOne();

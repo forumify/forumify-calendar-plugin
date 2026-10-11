@@ -16,3 +16,6 @@ calendar:
         created_by: 'Event by'
         delete: 'You are about to delete event "{event}".'
         deleted: 'Event deleted.'
+    notification:
+        event_created: 'A new event was posted in "{calendar}"'
+        event_view: 'View calendar'
