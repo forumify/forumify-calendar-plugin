@@ -6,13 +6,13 @@ namespace PluginTests\Tests\Application\Api;
 
 use PluginTests\Tests\Factories\CalendarFactory;
 use Symfony\Component\HttpClient\Exception\ClientException;
-use Tests\Tests\Application\Api\ApiTestCase;
-use Tests\Tests\Application\Api\Crud\DeleteTestTrait;
-use Tests\Tests\Application\Api\Crud\GetCollectionTestTrait;
-use Tests\Tests\Application\Api\Crud\GetTestTrait;
-use Tests\Tests\Application\Api\Crud\PatchTestTrait;
-use Tests\Tests\Application\Api\Crud\PostTestTrait;
-use Tests\Tests\Factories\OAuth\OAuthClientFactory;
+use Forumify\Testing\Api\ApiTestCase;
+use Forumify\Testing\Api\Crud\DeleteTestTrait;
+use Forumify\Testing\Api\Crud\GetCollectionTestTrait;
+use Forumify\Testing\Api\Crud\GetTestTrait;
+use Forumify\Testing\Api\Crud\PatchTestTrait;
+use Forumify\Testing\Api\Crud\PostTestTrait;
+use Forumify\Testing\Factories\OAuth\OAuthClientFactory;
 
 class CalendarApiTest extends ApiTestCase
 {
