@@ -1,5 +1,10 @@
+/* the view mode controller switches to the list view when the card is narrower than this */
+.calendar-card {
+    --calendar-grid-min-width: 1000px
+}
+
 .calendar {
-    min-width: 1000px;
+    min-width: var(--calendar-grid-min-width);
     overflow-x: auto
 }
 
@@ -110,4 +115,126 @@
 
 .calendar-day .modal-body {
     text-wrap: wrap
+}
+
+/* list view: each day is a group of topic-like event rows, with the date in a column on the left */
+.calendar-list-day {
+    display: flex
+}
+
+.calendar-list-date {
+    align-items: center;
+    border-right: var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    font-weight: 400;
+    gap: var(--spacing-1);
+    line-height: 1;
+    margin: 0;
+    padding: var(--spacing-4) var(--spacing-2);
+    width: 72px
+}
+
+.calendar-list-day-number {
+    align-items: center;
+    border-radius: 50%;
+    display: flex;
+    font-size: 1.5rem;
+    font-weight: 600;
+    height: 40px;
+    justify-content: center;
+    width: 40px
+}
+
+.calendar-list-day-number.today {
+    background-color: var(--c-primary);
+    color: var(--c-primary-text)
+}
+
+.calendar-list-day.past .calendar-list-date {
+    opacity: .6
+}
+
+.calendar-list-events {
+    flex-grow: 1;
+    min-width: 0
+}
+
+/* the button covers the whole row like a topic link, so clicking anywhere opens the event */
+.calendar-list-title {
+    background: none;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    text-align: left
+}
+
+.calendar-list-title::after {
+    content: '';
+    inset: 0;
+    position: absolute
+}
+
+.calendar-list-title:focus-visible {
+    outline: none
+}
+
+.calendar-list-events .topic-row:has(.calendar-list-title:focus-visible) {
+    background-color: var(--c-hover);
+    outline: 2px solid var(--c-primary-accent);
+    outline-offset: -2px
+}
+
+.calendar-list-events h4 {
+    flex-wrap: wrap
+}
+
+.calendar-list-events .tag {
+    white-space: nowrap
+}
+
+.calendar-list-events .topic-author {
+    position: relative;
+    z-index: 1
+}
+
+.calendar-list-excerpt {
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: var(--c-text-secondary);
+    display: -webkit-box;
+    line-clamp: 2;
+    max-width: 75ch;
+    overflow: hidden
+}
+
+.calendar-list-banner {
+    aspect-ratio: 16 / 9;
+    flex-shrink: 0;
+    object-fit: cover;
+    width: 160px
+}
+
+.calendar-list-empty {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    padding: var(--spacing-12) var(--spacing-4);
+    text-align: center
+}
+
+@media screen and (max-width: 599px) {
+    .calendar-list-date {
+        padding-left: var(--spacing-1);
+        padding-right: var(--spacing-1);
+        width: 56px
+    }
+
+    .calendar-list-events .topic-row {
+        padding: var(--spacing-3)
+    }
 }

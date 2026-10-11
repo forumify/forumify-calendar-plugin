@@ -11,7 +11,16 @@
             {% endif %}
         </div>
     </div>
-    <div class="card">
+    <div class="card calendar-card"{% if this.chosenViewMode is null %} {{ stimulus_controller('forumify/forumify-calendar-plugin/view_mode') }}{% endif %}>
+        {% if this.chosenViewMode is null %}
+            <input
+                type="checkbox"
+                hidden
+                data-model="narrow"
+                {{ stimulus_target('forumify/forumify-calendar-plugin/view_mode', 'narrow') }}
+                {% if this.narrow %}checked{% endif %}
+            >
+        {% endif %}
         <div class="calendar-toolbar">
             <div class="flex items-center gap-4">
                 <div class="calendar-segmented" role="group" aria-label="{{ 'calendar.navigation'|trans }}">
@@ -43,15 +52,19 @@
                 {% endfor %}
             </div>
         </div>
-        <div class="w-100" style="max-width: 100%; overflow-x: auto">
-            <div class="calendar">
-                {% if this.viewMode == 'month' %}
-                    {% include '@ForumifyCalendarPlugin/frontend/components/calendar/calendar_month.html.twig' %}
-                {% else %}
-                    {% include '@ForumifyCalendarPlugin/frontend/components/calendar/calendar_week.html.twig' %}
-                {% endif %}
+        {% if this.viewMode == 'list' %}
+            {% include '@ForumifyCalendarPlugin/frontend/components/calendar/calendar_list.html.twig' %}
+        {% else %}
+            <div class="w-100" style="max-width: 100%; overflow-x: auto">
+                <div class="calendar">
+                    {% if this.viewMode == 'month' %}
+                        {% include '@ForumifyCalendarPlugin/frontend/components/calendar/calendar_month.html.twig' %}
+                    {% else %}
+                        {% include '@ForumifyCalendarPlugin/frontend/components/calendar/calendar_week.html.twig' %}
+                    {% endif %}
+                </div>
             </div>
-        </div>
+        {% endif %}
     </div>
     <p class="text-small text-light mt-2">
         <i class="ph ph-clock"></i>

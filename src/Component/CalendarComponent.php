@@ -10,6 +10,7 @@ use Forumify\Calendar\Entity\Calendar;
 use Forumify\Calendar\Entity\CalendarEvent;
 use Forumify\Calendar\Repository\CalendarEventRepository;
 use Forumify\Calendar\Repository\CalendarRepository;
+use Forumify\Calendar\Service\CalendarViewPreference;
 use Forumify\Calendar\Service\EventRecurrence;
 use Forumify\Core\Service\TimezoneResolver;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -26,7 +27,7 @@ class CalendarComponent
 
     public const float HOUR_HEIGHT = 40;
     public const float MINUTE_HEIGHT = 1 / 60 * self::HOUR_HEIGHT;
-    public const array VIEW_MODES = ['month', 'week'];
+    public const array VIEW_MODES = ['month', 'week', 'list'];
 
     #[LiveProp]
     public DateTime $now;
@@ -37,8 +38,13 @@ class CalendarComponent
     #[LiveProp]
     public ?Calendar $selectedCalendar = null;
 
+    /** The view mode the visitor picked, null when it should follow the width of their screen */
     #[LiveProp]
-    public string $viewMode = 'month';
+    public ?string $chosenViewMode = null;
+
+    /** Set by the view mode controller while the month and week grids don't fit */
+    #[LiveProp(writable: true)]
+    public bool $narrow = false;
 
     /** @var array<string, list<CalendarEvent>>|null */
     private ?array $eventMemo = null;
@@ -48,6 +54,7 @@ class CalendarComponent
         private readonly CalendarRepository $calendarRepository,
         private readonly CalendarEventRepository $calendarEventRepository,
         private readonly EventRecurrence $eventRecurrence,
+        private readonly CalendarViewPreference $viewPreference,
     ) {
     }
 
@@ -59,6 +66,7 @@ class CalendarComponent
     public function mount(): void
     {
         $this->reset();
+        $this->chosenViewMode = $this->viewPreference->getRememberedViewMode();
     }
 
     /**
@@ -67,6 +75,11 @@ class CalendarComponent
     public function getVisibleCalendars(): array
     {
         return $this->calendarRepository->findAllVisibleCalendars();
+    }
+
+    public function getViewMode(): string
+    {
+        return $this->chosenViewMode ?? ($this->narrow ? 'list' : 'month');
     }
 
     public function showManageCalendarBtn(): bool
@@ -87,7 +100,7 @@ class CalendarComponent
         $firstDay = clone $this->view;
         $this->setTimezone($firstDay);
 
-        if ($this->viewMode === 'month') {
+        if ($this->getViewMode() !== 'week') {
             $firstDay->modify('first day of this month');
             $offset = (int)$firstDay->format('N') - 1;
             $firstDay->sub(new DateInterval("P{$offset}D"));
@@ -131,6 +144,29 @@ class CalendarComponent
         return $events;
     }
 
+    /**
+     * The days of the viewed month that have events, in order.
+     *
+     * @return list<array{ date: DateTime, events: list<CalendarEvent> }>
+     */
+    public function getListDays(): array
+    {
+        $month = $this->view->format('Y-m-');
+
+        $days = [];
+        foreach ($this->getAllEvents($this->view, $this->selectedCalendar) as $day => $events) {
+            if (str_starts_with($day, $month)) {
+                $days[$day] = [
+                    'date' => new DateTime($day, $this->view->getTimezone()),
+                    'events' => array_values($events),
+                ];
+            }
+        }
+
+        ksort($days);
+        return array_values($days);
+    }
+
     public function toTime(int $i): string
     {
         $hours = str_pad((string)$i, 2, '0', STR_PAD_LEFT);
@@ -140,7 +176,7 @@ class CalendarComponent
     #[LiveAction]
     public function prev(): void
     {
-        if ($this->viewMode === 'month') {
+        if ($this->getViewMode() !== 'week') {
             $this->view->modify('first day of previous month');
         } else {
             $this->view->modify('last week');
@@ -152,7 +188,7 @@ class CalendarComponent
     #[LiveAction]
     public function next(): void
     {
-        if ($this->viewMode === 'month') {
+        if ($this->getViewMode() !== 'week') {
             $this->view->modify('first day of next month');
         } else {
             $this->view->modify('next week');
@@ -174,7 +210,8 @@ class CalendarComponent
         }
 
         // keeps the date being viewed, so switching shows the week or month around it
-        $this->viewMode = $viewMode;
+        $this->chosenViewMode = $viewMode;
+        $this->viewPreference->remember($viewMode);
     }
 
     private function setTimezone(DateTime $date): void

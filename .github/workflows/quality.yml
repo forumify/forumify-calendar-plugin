@@ -18,13 +18,27 @@ jobs:
           php-version: '8.4'
           tools: composer
 
+      - name: Setup JS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: composer install
+      - parallel:
+        - name: Install PHP Dependencies
+          run: composer install --no-progress
+
+        - name: Install JS Dependencies
+          working-directory: assets
+          run: npm install --force
 
       - name: Run PHP checks
         run: |
           ./vendor/bin/phpcs -s --standard=phpcs.xml
           ./vendor/bin/phpstan analyze -v
+
+      - name: Run JS checks
+        working-directory: assets
+        run: npm run lint
