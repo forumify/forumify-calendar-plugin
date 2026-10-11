@@ -1,0 +1,19 @@
+{% extends '@Forumify/emails/base.html.twig' %}
+{% block title %}
+    {{ event.title }}
+{% endblock %}
+{% block body %}
+    <h2>{{ this.title(notification) }}</h2>
+    <hr>
+    {% include '@ForumifyCalendarPlugin/emails/notifications/_event_details.html.twig' with {
+        event: event,
+        start: this.occurrenceStart(notification) ?? event.start,
+        end: this.occurrenceStart(notification) is null ? event.end : this.occurrenceEnd(notification),
+        timezone: this.timezone(notification),
+    } only %}
+    <hr>
+    {% include '@Forumify/emails/components/button.html.twig' with {
+        href: path('forumify_calendar_all', { slug: event.calendar.slug }),
+        label: 'calendar.notification.event_view'|trans,
+    } only %}
+{% endblock %}

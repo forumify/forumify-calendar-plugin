@@ -3,8 +3,68 @@
     overflow-x: auto
 }
 
-.calendar-select {
-    max-width: 200px
+.calendar-header {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    justify-content: space-between;
+    margin-bottom: var(--spacing-4)
+}
+
+/* the calendar picker doubles as the page title, its text lines up with the card below */
+.calendar-title {
+    font-size: 1.25rem;
+    font-weight: 600
+}
+
+.calendar-title .dot {
+    height: 12px;
+    width: 12px
+}
+
+.calendar-toolbar {
+    align-items: center;
+    border-bottom: var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2) var(--spacing-4);
+    justify-content: space-between;
+    padding: var(--spacing-3) var(--spacing-4)
+}
+
+.calendar-period {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0
+}
+
+.calendar-period .text-light {
+    font-size: 1rem
+}
+
+/* related buttons joined into one control, used for both navigation and the view switch */
+.calendar-segmented {
+    border: var(--border);
+    border-radius: var(--button-border-radius);
+    display: inline-flex;
+    overflow: hidden
+}
+
+.calendar-segmented > .btn-link {
+    border-radius: 0;
+    font-size: 0.875rem;
+    height: 36px;
+    padding: 0 var(--spacing-3)
+}
+
+.calendar-segmented > .btn-link + .btn-link {
+    border-left: var(--border)
+}
+
+.calendar-segmented > .btn-link.active {
+    background-color: var(--c-hover);
+    color: var(--c-primary)
 }
 
 .calendar-day {
@@ -23,7 +83,7 @@
     background-color: var(--c-hover)
 }
 
-.calendar-day>span {
+.calendar-date {
     align-items: center;
     border-radius: 12px;
     display: flex;
@@ -32,7 +92,7 @@
     width: 24px
 }
 
-.calendar-day>span.today {
+.calendar-date.today {
     background-color: var(--c-primary);
     color: var(--c-primary-text);
     font-weight: 700

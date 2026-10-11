@@ -74,7 +74,7 @@ class CalendarComponentTest extends WebTestCase
         self::assertStringNotContainsString('Next Month Event', $render);
     }
 
-    public function testToggleViewModeShowsCurrentWeek(): void
+    public function testSwitchingToWeekViewShowsCurrentWeek(): void
     {
         $calendar = CalendarFactory::createOne();
         CalendarEventFactory::createOne([
@@ -88,10 +88,47 @@ class CalendarComponentTest extends WebTestCase
 
         self::assertEquals('month', $component->component()->viewMode);
 
-        $render = (string)$component->call('toggleViewMode')->render();
+        $render = (string)$component->call('setViewMode', ['viewMode' => 'week'])->render();
 
         self::assertEquals('week', $component->component()->viewMode);
         self::assertStringContainsString('Happening Today', $render);
+        self::assertSame(
+            ['Month' => 'false', 'Week' => 'true'],
+            $this->viewModeButtons($component->render()->crawler()),
+        );
+    }
+
+    public function testTodayReturnsToTheCurrentMonth(): void
+    {
+        $component = $this->createLiveComponent('Forumify\Calendar', ['selectedCalendar' => CalendarFactory::createOne()])
+            ->actingAs($this->createSuperAdmin());
+
+        $component->call('next')->call('next');
+        self::assertStringNotContainsString(new DateTime()->format('F Y'), (string)$component->render());
+
+        $component->call('today');
+        self::assertStringContainsString(new DateTime()->format('F Y'), (string)$component->render());
+    }
+
+    public function testUnknownViewModeIsRejected(): void
+    {
+        $component = $this->createLiveComponent('Forumify\Calendar', ['selectedCalendar' => CalendarFactory::createOne()])
+            ->actingAs($this->createSuperAdmin());
+
+        $this->expectExceptionMessage('Unknown view mode "year".');
+        $component->call('setViewMode', ['viewMode' => 'year']);
+    }
+
+    /**
+     * @return array<string, string> the aria-pressed state of each view mode button, keyed by label
+     */
+    private function viewModeButtons(Crawler $crawler): array
+    {
+        $buttons = [];
+        $crawler->filter('button[aria-pressed]')->each(function (Crawler $button) use (&$buttons) {
+            $buttons[$button->text()] = (string)$button->attr('aria-pressed');
+        });
+        return $buttons;
     }
 
     public function testRecurringEventRepeatsOnEveryDayOfTheMonth(): void
@@ -166,6 +203,21 @@ class CalendarComponentTest extends WebTestCase
             ->actingAs($user)
             ->render();
         self::assertStringContainsString('Members Only', $render);
+    }
+
+    public function testNotificationsMenuShowsWithAndWithoutSelectedCalendar(): void
+    {
+        $user = $this->createSuperAdmin();
+
+        foreach ([['selectedCalendar' => CalendarFactory::createOne()], []] as $props) {
+            $crawler = $this->createLiveComponent('Forumify\Calendar', $props)
+                ->actingAs($user)
+                ->render()
+                ->crawler();
+            $menu = $crawler->filter('[data-live-name-value$="CalendarNotifications"]');
+            self::assertCount(1, $menu);
+            self::assertSame('Notifications', $menu->filter('button[aria-label]')->attr('aria-label'));
+        }
     }
 
     public function testTimezoneNoticeOnlyPromptsGuestsToLogIn(): void

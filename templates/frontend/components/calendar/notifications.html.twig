@@ -1,0 +1,46 @@
+{% set targetPath = path('forumify_calendar_all', this.calendar ? { slug: this.calendar.slug } : {}) %}
+<div {{ attributes }}>
+    {% if app.user is null %}
+        <a
+            class="btn-outlined btn-icon"
+            href="{{ path('forumify_core_login', { '_target_path': targetPath }) }}"
+            aria-label="{{ 'calendar.notifications.button'|trans }}"
+            title="{{ 'calendar.notifications.button'|trans }}"
+        >
+            <i class="ph ph-bell"></i>
+        </a>
+    {% else %}
+        {% embed '@Forumify/components/menu.html.twig' with { placement: 'bottom-end', hideAdornment: true } %}
+            {% block open_button %}
+                <button
+                    class="btn-outlined btn-icon"
+                    aria-label="{{ 'calendar.notifications.button'|trans }}"
+                    title="{{ 'calendar.notifications.button'|trans }}"
+                    {{ stimulus_target('forumify/menu', 'openButton') }}
+                >
+                    <i class="ph {{ this.active ? 'ph-bell-ringing' : 'ph-bell' }}"></i>
+                </button>
+            {% endblock %}
+            {% block menu_items %}
+                {% if this.calendar is null %}
+                    <span class="text-small text-light pl-4 pr-4 pt-1 pb-1" style="white-space: nowrap">{{ 'calendar.notifications.all_calendars'|trans }}</span>
+                {% endif %}
+                {% include '@ForumifyCalendarPlugin/frontend/components/calendar/notifications_checkbox.html.twig' with {
+                    state: this.subscriptionState,
+                    action: 'toggleSubscription',
+                    label: 'calendar.notifications.new_events'|trans,
+                } only %}
+                <hr>
+                <span class="text-small text-light pl-4 pr-4 pt-1 pb-1" style="white-space: nowrap">{{ 'calendar.notifications.reminders'|trans }}</span>
+                {% for minutesBefore in this.minutesBeforeOptions %}
+                    {% include '@ForumifyCalendarPlugin/frontend/components/calendar/notifications_checkbox.html.twig' with {
+                        state: this.reminderState(minutesBefore),
+                        action: 'toggleReminder',
+                        args: { minutesBefore: minutesBefore },
+                        label: 'calendar.notifications.minutes_before'|trans({ minutes: minutesBefore }),
+                    } only %}
+                {% endfor %}
+            {% endblock %}
+        {% endembed %}
+    {% endif %}
+</div>

@@ -57,4 +57,37 @@ class CalendarEventRepository extends AbstractRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * Finds events in the given calendars that start in ($after, $until], or that repeat and might have an
+     * occurrence in that range. Use EventRecurrence to find the exact occurrences of repeating events.
+     *
+     * @param list<int> $calendarIds
+     * @return array<CalendarEvent>
+     */
+    public function findPossiblyStartingBetween(array $calendarIds, \DateTime $after, \DateTime $until): array
+    {
+        if (empty($calendarIds)) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder('ce');
+        return $qb
+            ->where('ce.calendar IN (:calendars)')
+            ->andWhere($qb->expr()->orX(
+                $qb->expr()->andX('ce.repeat IS NULL', 'ce.start > :after', 'ce.start <= :until'),
+                $qb->expr()->andX(
+                    'ce.repeat IS NOT NULL',
+                    'ce.start <= :until',
+                    // the repeat end is a date in the event's timezone, leave a day of slack for EventRecurrence
+                    $qb->expr()->orX('ce.repeatEnd IS NULL', 'ce.repeatEnd >= :repeatEndAfter'),
+                ),
+            ))
+            ->setParameter('calendars', $calendarIds)
+            ->setParameter('after', $after)
+            ->setParameter('until', $until)
+            ->setParameter('repeatEndAfter', (clone $after)->modify('-1 day'))
+            ->getQuery()
+            ->getResult();
+    }
 }

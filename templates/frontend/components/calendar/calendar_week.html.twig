@@ -1,6 +1,8 @@
 {% set cursor = this.startDay() %}
+{# hour labels sit 8px above their line, so they're vertically centered on it #}
+{% set headerHeight = 32 %}
 <div class="flex justify-between">
-    <div class="border-r pl-2 pr-2 text-right text-small text-light" style="padding-top: 12px">
+    <div class="border-r pl-2 pr-2 text-right text-small text-light" style="padding-top: {{ headerHeight - 8 }}px">
         {% for hour in 0..23 %}
             <div style="height: {{ this.HOUR_HEIGHT }}px">
                 {% if hour > 0 %}
@@ -14,10 +16,11 @@
         {% set events = this.eventsWeekView(cursor) %}
         <div class="flex flex-col w-100" style="{% if isToday %}background-color: var(--c-elevation-2);{% endif %}">
             <div
-                class="w-100 flex justify-center items-center border-b{% if not loop.last %} border-r{% endif %} text-small text-light"
-                style="height: {{ this.HOUR_HEIGHT / 2 }}px;"
+                class="w-100 flex justify-center items-center gap-1 border-b{% if not loop.last %} border-r{% endif %} text-small"
+                style="height: {{ headerHeight }}px;"
             >
-                {{ cursor|date('D d')|upper }}
+                <span class="text-light">{{ cursor|date('D') }}</span>
+                <span class="calendar-date{% if isToday %} today{% endif %}">{{ cursor|date('j') }}</span>
             </div>
             <div class="relative{% if not loop.last %} border-r{% endif %}" style="overflow-y: hidden">
                 {% for hour in 0..23 %}

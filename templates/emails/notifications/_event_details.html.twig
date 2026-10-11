@@ -1,0 +1,22 @@
+{# expects: event, start, end (nullable) and timezone #}
+<div class="content-block">
+    {% if event.banner is not null %}
+        <img width="100%" src="{{ absolute_url(asset(event.banner, 'forumify.asset')) }}" alt="banner">
+    {% endif %}
+    <h1>{{ event.title }}</h1>
+    <p>
+        <strong>{{ start|date('l, F j, Y g:i A', timezone) }}</strong>
+        {% if end is not null %}
+            {{ 'calendar.event.until'|trans }}
+            {% if end|date('Ymd', timezone) == start|date('Ymd', timezone) %}
+                <strong>{{ end|date('g:i A', timezone) }}</strong>
+            {% else %}
+                <strong>{{ end|date('l, F j, Y g:i A', timezone) }}</strong>
+            {% endif %}
+        {% endif %}
+        ({{ timezone.name }})
+    </p>
+    {% if event.content|striptags is not empty %}
+        <p>{{ event.content|striptags|u.truncate(400, '...', false) }}</p>
+    {% endif %}
+</div>
