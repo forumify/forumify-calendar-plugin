@@ -2,7 +2,7 @@
 <div class="flex justify-between">
     {% for day in 1..7 %}
         <div class="w-100 flex justify-center p-1 border-b {% if not loop.last %}border-r{% endif %} text-small text-light">
-            {{ cursor|date('D')|upper }}
+            {{ cursor|date('D') }}
             {% set cursor = cursor|date_modify('next day') %}
         </div>
     {% endfor %}
@@ -19,7 +19,7 @@
                 {% if not loop.last %}border-r{% endif %}
                 {% if not isCurrentMonth %}off-month{% endif %}
             ">
-                <span class="text-small mb-1{% if isToday %} today{% endif %}">
+                <span class="calendar-date text-small mb-1{% if isToday %} today{% endif %}">
                     {{ cursor|date('j') }}
                 </span>
                 <div class="w-100 flex flex-col p-1">

@@ -6,21 +6,18 @@ namespace PluginTests\Tests\Application;
 
 use DateTime;
 use DateTimeZone;
-use Doctrine\Common\Collections\ArrayCollection;
 use Forumify\Calendar\Entity\Calendar;
 use Forumify\Calendar\Notification\EventCreatedNotificationType;
 use Forumify\Core\Entity\Notification;
-use Forumify\Core\Entity\Role;
 use Forumify\Core\Entity\User;
 use Forumify\Core\Repository\NotificationRepository;
 use Forumify\Forum\Entity\Subscription;
 use Forumify\Forum\Repository\SubscriptionRepository;
 use Forumify\Testing\Factories\Core\RoleFactory;
-use Forumify\Testing\Factories\Core\UserFactory;
 use Forumify\Testing\Traits\SettingTrait;
-use PluginTests\Tests\Factories\ACLFactory;
 use PluginTests\Tests\Factories\CalendarEventFactory;
 use PluginTests\Tests\Factories\CalendarFactory;
+use PluginTests\Tests\Traits\CalendarAccessTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -30,13 +27,14 @@ class EventCreatedNotificationTest extends KernelTestCase
 {
     use Factories;
     use SettingTrait;
+    use CalendarAccessTrait;
 
     public function testSubscribersAreNotifiedOfNewEvents(): void
     {
         $calendar = CalendarFactory::createOne();
         $role = $this->createRoleThatCanView($calendar);
-        $subscriber = $this->createUser($role);
-        $bystander = $this->createUser($role);
+        $subscriber = $this->createUserWithRole($role);
+        $bystander = $this->createUserWithRole($role);
         $this->subscribe($subscriber, $calendar);
 
         $event = CalendarEventFactory::createOne(['calendar' => $calendar]);
@@ -51,7 +49,7 @@ class EventCreatedNotificationTest extends KernelTestCase
     {
         $calendar = CalendarFactory::createOne();
         $otherCalendar = CalendarFactory::createOne();
-        $subscriber = $this->createUser($this->createRoleThatCanView($calendar, $otherCalendar));
+        $subscriber = $this->createUserWithRole($this->createRoleThatCanView($calendar, $otherCalendar));
         $this->subscribe($subscriber, $otherCalendar);
 
         CalendarEventFactory::createOne(['calendar' => $calendar]);
@@ -62,7 +60,7 @@ class EventCreatedNotificationTest extends KernelTestCase
     public function testSubscribersWithoutViewPermissionAreNotNotified(): void
     {
         $calendar = CalendarFactory::createOne();
-        $subscriber = $this->createUser(RoleFactory::createOne());
+        $subscriber = $this->createUserWithRole(RoleFactory::createOne());
         $this->subscribe($subscriber, $calendar);
 
         CalendarEventFactory::createOne(['calendar' => $calendar]);
@@ -73,7 +71,7 @@ class EventCreatedNotificationTest extends KernelTestCase
     public function testAuthorIsNotNotifiedOfTheirOwnEvent(): void
     {
         $calendar = CalendarFactory::createOne();
-        $author = $this->createUser($this->createRoleThatCanView($calendar));
+        $author = $this->createUserWithRole($this->createRoleThatCanView($calendar));
         $this->subscribe($author, $calendar);
 
         self::getContainer()->get('security.token_storage')->setToken(
@@ -89,7 +87,7 @@ class EventCreatedNotificationTest extends KernelTestCase
         $this->setSetting('forumify.mailer.from', 'calendar@example.org');
 
         $calendar = CalendarFactory::createOne(['title' => 'Community Events']);
-        $subscriber = $this->createUser($this->createRoleThatCanView($calendar));
+        $subscriber = $this->createUserWithRole($this->createRoleThatCanView($calendar));
         $subscriber->setTimezone('Asia/Tokyo');
         $this->subscribe($subscriber, $calendar);
 
@@ -114,26 +112,6 @@ class EventCreatedNotificationTest extends KernelTestCase
         self::assertEmailHtmlBodyContains($email, 'Saturday, June 15, 2030 9:00 PM');
         self::assertEmailHtmlBodyContains($email, 'Asia/Tokyo');
         self::assertEmailHtmlBodyContains($email, '/calendar/' . $calendar->getSlug());
-    }
-
-    private function createRoleThatCanView(Calendar ...$calendars): Role
-    {
-        $role = RoleFactory::createOne();
-        foreach ($calendars as $calendar) {
-            ACLFactory::createOne([
-                'entity' => Calendar::class,
-                'entityId' => (string)$calendar->getId(),
-                'permission' => 'view',
-                'roles' => [$role],
-            ]);
-        }
-
-        return $role;
-    }
-
-    private function createUser(Role $role): User
-    {
-        return UserFactory::createOne(['roleEntities' => new ArrayCollection([$role])]);
     }
 
     private function subscribe(User $user, Calendar $calendar): void

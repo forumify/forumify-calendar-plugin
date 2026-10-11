@@ -3,30 +3,14 @@
     {{ event.title }}
 {% endblock %}
 {% block body %}
-    {% set timezone = this.timezone(notification) %}
     <h2>{{ 'calendar.notification.event_created'|trans({ calendar: event.calendar.title }) }}</h2>
     <hr>
-    <div class="content-block">
-        {% if event.banner is not null %}
-            <img width="100%" src="{{ absolute_url(asset(event.banner, 'forumify.asset')) }}" alt="banner">
-        {% endif %}
-        <h1>{{ event.title }}</h1>
-        <p>
-            <strong>{{ event.start|date('l, F j, Y g:i A', timezone) }}</strong>
-            {% if event.end is not null %}
-                {{ 'calendar.event.until'|trans }}
-                {% if event.end|date('Ymd', timezone) == event.start|date('Ymd', timezone) %}
-                    <strong>{{ event.end|date('g:i A', timezone) }}</strong>
-                {% else %}
-                    <strong>{{ event.end|date('l, F j, Y g:i A', timezone) }}</strong>
-                {% endif %}
-            {% endif %}
-            ({{ timezone.name }})
-        </p>
-        {% if event.content|striptags is not empty %}
-            <p>{{ event.content|striptags|u.truncate(400, '...', false) }}</p>
-        {% endif %}
-    </div>
+    {% include '@ForumifyCalendarPlugin/emails/notifications/_event_details.html.twig' with {
+        event: event,
+        start: event.start,
+        end: event.end,
+        timezone: this.timezone(notification),
+    } only %}
     <hr>
     {% include '@Forumify/emails/components/button.html.twig' with {
         href: path('forumify_calendar_all', { slug: event.calendar.slug }),

@@ -8,6 +8,15 @@ calendar:
     all_calendars: 'All Calendars'
     timezone_notice: 'Times are shown in {timezone}.'
     timezone_notice_guest: '<a href="{loginPath}">Log in</a> to see them in your own timezone.'
+    navigation: 'Navigate the calendar'
+    previous: 'Previous'
+    next: 'Next'
+    today: 'Today'
+    week_number: 'Week {week}'
+    view_mode: 'View'
+    view:
+        month: 'Month'
+        week: 'Week'
     event:
         edit: 'Edit Event'
         until: 'until'
@@ -18,4 +27,11 @@ calendar:
         deleted: 'Event deleted.'
     notification:
         event_created: 'A new event was posted in "{calendar}"'
+        event_reminder: '"{event}" starts in {minutes, plural, =60 {1 hour} =1440 {1 day} other {# minutes}}'
         event_view: 'View calendar'
+    notifications:
+        button: 'Notifications'
+        all_calendars: 'For all calendars'
+        new_events: 'New events'
+        reminders: 'Remind me before each event'
+        minutes_before: '{minutes, plural, =60 {1 hour} =1440 {1 day} other {# minutes}} before'

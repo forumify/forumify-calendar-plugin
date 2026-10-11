@@ -1,0 +1,7 @@
+{# a native checkbox can only be indeterminate through javascript, so this draws one #}
+{% set checked = { off: 'false', mixed: 'mixed', on: 'true' }[state] %}
+{% set icon = { off: 'ph-square', mixed: 'ph-minus-square', on: 'ph-check-square' }[state] %}
+<button class="btn-link" role="checkbox" aria-checked="{{ checked }}" {{ live_action(action, args ?? {}) }}>
+    <i class="ph {{ icon }}"></i>
+    {{ label }}
+</button>

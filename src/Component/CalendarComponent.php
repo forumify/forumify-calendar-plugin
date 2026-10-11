@@ -10,9 +10,12 @@ use Forumify\Calendar\Entity\Calendar;
 use Forumify\Calendar\Entity\CalendarEvent;
 use Forumify\Calendar\Repository\CalendarEventRepository;
 use Forumify\Calendar\Repository\CalendarRepository;
+use Forumify\Calendar\Service\EventRecurrence;
 use Forumify\Core\Service\TimezoneResolver;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 
@@ -23,6 +26,7 @@ class CalendarComponent
 
     public const float HOUR_HEIGHT = 40;
     public const float MINUTE_HEIGHT = 1 / 60 * self::HOUR_HEIGHT;
+    public const array VIEW_MODES = ['month', 'week'];
 
     #[LiveProp]
     public DateTime $now;
@@ -43,6 +47,7 @@ class CalendarComponent
         private readonly TimezoneResolver $timezoneResolver,
         private readonly CalendarRepository $calendarRepository,
         private readonly CalendarEventRepository $calendarEventRepository,
+        private readonly EventRecurrence $eventRecurrence,
     ) {
     }
 
@@ -156,10 +161,20 @@ class CalendarComponent
     }
 
     #[LiveAction]
-    public function toggleViewMode(): void
+    public function today(): void
     {
-        $this->viewMode = $this->viewMode === 'month' ? 'week' : 'month';
         $this->reset();
+    }
+
+    #[LiveAction]
+    public function setViewMode(#[LiveArg] string $viewMode): void
+    {
+        if (!in_array($viewMode, self::VIEW_MODES, true)) {
+            throw new BadRequestHttpException("Unknown view mode \"$viewMode\".");
+        }
+
+        // keeps the date being viewed, so switching shows the week or month around it
+        $this->viewMode = $viewMode;
     }
 
     private function setTimezone(DateTime $date): void
@@ -210,52 +225,24 @@ class CalendarComponent
         DateTime $start,
         DateTime $end,
     ): void {
-        $eventStart = clone $event->getStart();
         if ($event->getRepeat() === null) {
-            $this->eventMemo[$eventStart->format('Y-m-d')][] = $event;
+            $this->eventMemo[$event->getStart()->format('Y-m-d')][] = $event;
             return;
-        }
-
-        $repeatEnd = $event->getRepeatEnd();
-        if ($repeatEnd !== null) {
-            $repeatEnd->setTimezone($start->getTimezone());
-            $repeatEnd->setTime(23, 59, 59);
-
-            $end = $repeatEnd;
         }
 
         $eventEnd = $event->getEnd();
         $eventDuration = $eventEnd === null
             ? null
-            : $eventStart->diff($eventEnd, true);
+            : $event->getStart()->diff($eventEnd, true);
 
-        while ($eventStart < $end) {
-            if ($eventStart > $start) {
-                $event = clone $event;
-                $event->setStart(clone $eventStart);
-                if ($eventDuration) {
-                    $event->setEnd((clone $eventStart)->add($eventDuration));
-                }
-
-                $this->eventMemo[$eventStart->format('Y-m-d')][] = $event;
+        foreach ($this->eventRecurrence->getOccurrences($event, $start, $end) as $occurrence) {
+            $occurrenceEvent = clone $event;
+            $occurrenceEvent->setStart($occurrence);
+            if ($eventDuration) {
+                $occurrenceEvent->setEnd((clone $occurrence)->add($eventDuration));
             }
 
-            switch ($event->getRepeat()) {
-                case 'daily':
-                    $eventStart->add(new DateInterval('P1D'));
-                    break;
-                case 'weekly':
-                    $eventStart->add(new DateInterval('P1W'));
-                    break;
-                case 'monthly':
-                    $eventStart->add(new DateInterval('P1M'));
-                    break;
-                case 'yearly':
-                    $eventStart->add(new DateInterval('P1Y'));
-                    break;
-                default:
-                    break 2;
-            }
+            $this->eventMemo[$occurrence->format('Y-m-d')][] = $occurrenceEvent;
         }
     }
 }
