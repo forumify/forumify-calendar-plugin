@@ -1,3 +1,0 @@
-doctrine_migrations:
-    migrations_paths:
-        'ForumifyCalendarMigrations': '%kernel.project_dir%/vendor/forumify/forumify-calendar-plugin/migrations'

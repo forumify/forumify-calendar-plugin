@@ -17,8 +17,8 @@ use PluginTests\Tests\Factories\CalendarFactory;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\UX\LiveComponent\Test\InteractsWithLiveComponents;
-use Tests\Tests\Factories\Core\RoleFactory;
-use Tests\Tests\Factories\Core\UserFactory;
+use Forumify\Testing\Factories\Core\RoleFactory;
+use Forumify\Testing\Factories\Core\UserFactory;
 use Zenstruck\Foundry\Test\Factories;
 
 class CalendarComponentTest extends WebTestCase

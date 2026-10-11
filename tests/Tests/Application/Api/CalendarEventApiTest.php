@@ -8,12 +8,12 @@ use ApiPlatform\Metadata\IriConverterInterface;
 use PluginTests\Tests\Factories\CalendarEventFactory;
 use PluginTests\Tests\Factories\CalendarFactory;
 use Symfony\Component\HttpClient\Exception\ClientException;
-use Tests\Tests\Application\Api\ApiTestCase;
-use Tests\Tests\Application\Api\Crud\DeleteTestTrait;
-use Tests\Tests\Application\Api\Crud\GetCollectionTestTrait;
-use Tests\Tests\Application\Api\Crud\GetTestTrait;
-use Tests\Tests\Application\Api\Crud\PatchTestTrait;
-use Tests\Tests\Factories\OAuth\OAuthClientFactory;
+use Forumify\Testing\Api\ApiTestCase;
+use Forumify\Testing\Api\Crud\DeleteTestTrait;
+use Forumify\Testing\Api\Crud\GetCollectionTestTrait;
+use Forumify\Testing\Api\Crud\GetTestTrait;
+use Forumify\Testing\Api\Crud\PatchTestTrait;
+use Forumify\Testing\Factories\OAuth\OAuthClientFactory;
 
 class CalendarEventApiTest extends ApiTestCase
 {
