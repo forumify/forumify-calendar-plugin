@@ -86,15 +86,93 @@ class CalendarComponentTest extends WebTestCase
         $component = $this->createLiveComponent('Forumify\Calendar', ['selectedCalendar' => $calendar])
             ->actingAs($this->createSuperAdmin());
 
-        self::assertEquals('month', $component->component()->viewMode);
+        self::assertEquals('month', $component->component()->getViewMode());
 
         $render = (string)$component->call('setViewMode', ['viewMode' => 'week'])->render();
 
-        self::assertEquals('week', $component->component()->viewMode);
+        self::assertEquals('week', $component->component()->getViewMode());
         self::assertStringContainsString('Happening Today', $render);
         self::assertSame(
-            ['Month' => 'false', 'Week' => 'true'],
+            ['Month' => 'false', 'Week' => 'true', 'List' => 'false'],
             $this->viewModeButtons($component->render()->crawler()),
+        );
+    }
+
+    public function testNarrowCalendarUsesListViewUntilAViewModeIsChosen(): void
+    {
+        $component = $this->createLiveComponent('Forumify\\Calendar', ['selectedCalendar' => CalendarFactory::createOne()])
+            ->actingAs($this->createSuperAdmin());
+
+        self::assertCount(1, $component->render()->crawler()->filter('input[data-model="narrow"]'));
+
+        $component->set('narrow', true);
+        self::assertSame('list', $component->component()->getViewMode());
+
+        $component->set('narrow', false);
+        self::assertSame('month', $component->component()->getViewMode());
+
+        $component->call('setViewMode', ['viewMode' => 'week'])->set('narrow', true);
+        self::assertSame('week', $component->component()->getViewMode());
+        // the view mode controller is only needed while following the width of the screen
+        self::assertCount(0, $component->render()->crawler()->filter('input[data-model="narrow"]'));
+    }
+
+    public function testListViewShowsTheMonthsEventsGroupedByDay(): void
+    {
+        $calendar = CalendarFactory::createOne();
+        CalendarEventFactory::createOne([
+            'calendar' => $calendar,
+            'title' => 'Late Event',
+            'start' => $this->dayOfThisMonth(20)->setTime(18, 0),
+        ]);
+        CalendarEventFactory::createOne([
+            'calendar' => $calendar,
+            'title' => 'Early Event',
+            'start' => $this->dayOfThisMonth(3)->setTime(9, 0),
+        ]);
+        CalendarEventFactory::createOne([
+            'calendar' => $calendar,
+            'title' => 'Same Day Event',
+            'start' => $this->dayOfThisMonth(3)->setTime(14, 0),
+        ]);
+        CalendarEventFactory::createOne([
+            'calendar' => $calendar,
+            'title' => 'Next Month Event',
+            'start' => $this->dayOfThisMonth(1)->modify('first day of next month'),
+        ]);
+
+        $component = $this->createLiveComponent('Forumify\Calendar', ['selectedCalendar' => $calendar])
+            ->actingAs($this->createSuperAdmin());
+
+        $days = $component->call('setViewMode', ['viewMode' => 'list'])
+            ->render()
+            ->crawler()
+            ->filter('.calendar-list-day')
+            ->each(fn (Crawler $day) => [
+                $day->filter('.calendar-list-day-number')->text(),
+                $day->filter('.calendar-list-title')->each(fn (Crawler $title) => $title->text()),
+            ]);
+
+        self::assertSame([
+            ['3', ['Early Event', 'Same Day Event']],
+            ['20', ['Late Event']],
+        ], $days);
+
+        $render = (string)$component->call('next')->render();
+        self::assertStringContainsString('Next Month Event', $render);
+        self::assertStringNotContainsString('Early Event', $render);
+    }
+
+    public function testListViewWithoutEventsSaysSo(): void
+    {
+        $component = $this->createLiveComponent('Forumify\Calendar', ['selectedCalendar' => CalendarFactory::createOne()])
+            ->actingAs($this->createSuperAdmin());
+
+        $render = (string)$component->call('setViewMode', ['viewMode' => 'list'])->render();
+
+        self::assertStringContainsString(
+            'Nothing is scheduled in ' . new DateTime()->format('F Y') . '.',
+            html_entity_decode($render),
         );
     }
 

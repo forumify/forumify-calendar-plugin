@@ -1,0 +1,72 @@
+{% set today = this.now|date('Y-m-d') %}
+{% for day in this.listDays %}
+    {% set tz = day.date.timezone %}
+    {% set dayKey = day.date|date('Y-m-d', tz) %}
+    <section class="calendar-list-day{% if dayKey < today %} past{% endif %}{% if not loop.last %} border-b{% endif %}">
+        <h3 class="calendar-list-date">
+            <span class="text-small text-light">{{ day.date|date('D', tz) }}</span>
+            <span class="calendar-list-day-number{% if dayKey == today %} today{% endif %}">{{ day.date|date('j', tz) }}</span>
+            <span class="text-small text-light">{{ day.date|date('M', tz) }}</span>
+        </h3>
+        <ul class="calendar-list-events">
+            {% for event in day.events %}
+                <li class="{% if not loop.last %}border-b{% endif %}" {{ stimulus_controller('forumify/modal') }}>
+                    <div class="topic-row flex gap-4">
+                        <div class="flex-grow">
+                            <h4 class="mb-1 flex flex-row items-center gap-2 text-subtitle">
+                                {% if this.selectedCalendar is null %}
+                                    {% include '@Forumify/frontend/forum/forum_tag.html.twig' with { tag: event.calendar } only %}
+                                {% endif %}
+                                <button type="button" class="calendar-list-title">{{ event.title }}</button>
+                            </h4>
+                            <div class="flex flex-wrap items-center gap-2 text-small">
+                                <span class="text-bold">
+                                    {{ event.start|date('H:i', tz) }}
+                                    {%- if event.end is not null %}
+                                        &ndash;
+                                        {% if event.end|date('Y-m-d', tz) == dayKey %}
+                                            {{ event.end|date('H:i', tz) }}
+                                        {% else %}
+                                            {{ event.end|date('j M H:i', tz) }}
+                                        {% endif %}
+                                    {% endif %}
+                                </span>
+                                {% if event.repeat is not null %}
+                                    <i class="ph ph-repeat" title="{{ 'calendar.event.repeats'|trans }}"></i>
+                                {% endif %}
+                                {% if event.createdBy is not null %}
+                                    <span class="flex items-center gap-1">
+                                        {% include '@Forumify/components/avatar.html.twig' with { user: event.createdBy, className: 'avatar-xs' } only %}
+                                        {% include '@Forumify/components/username.html.twig' with { user: event.createdBy, className: 'topic-author' } only %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            {% set excerpt = event.content|striptags|trim %}
+                            {% if excerpt is not empty %}
+                                <p class="calendar-list-excerpt mt-2">{{ excerpt|u.truncate(300, '…', false) }}</p>
+                            {% endif %}
+                        </div>
+                        {% if event.banner is not null %}
+                            <img class="calendar-list-banner rounded hide-phone" src="{{ asset(event.banner, 'forumify.asset') }}" alt="">
+                        {% endif %}
+                    </div>
+                    <div class="modal" {{ stimulus_target('forumify/modal', 'modal') }}>
+                        <div class="modal-body" {{ stimulus_target('forumify/modal', 'modalBody') }}>
+                            {% include '@ForumifyCalendarPlugin/frontend/components/calendar/event.html.twig' %}
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+{% else %}
+    <div class="calendar-list-empty">
+        <i class="ph ph-calendar-blank text-huge text-light"></i>
+        <p>{{ 'calendar.list.empty'|trans({ month: this.view|date('F Y') }) }}</p>
+        {% if this.showManageCalendarBtn %}
+            <a class="btn-outlined" href="{{ path('forumify_calendar_event_create', { calendar: this.selectedCalendar }) }}">
+                {{ 'calendar.event.create'|trans }}
+            </a>
+        {% endif %}
+    </div>
+{% endfor %}

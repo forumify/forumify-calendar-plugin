@@ -17,9 +17,14 @@ calendar:
     view:
         month: 'Month'
         week: 'Week'
+        list: 'List'
+    view_mode_cookie_purpose: 'Remembers whether you last viewed the calendar by month, week or as a list.'
+    list:
+        empty: 'Nothing is scheduled in {month}.'
     event:
         edit: 'Edit Event'
         until: 'until'
+        repeats: 'Repeats'
         create: 'Create Event'
         created: 'Event created.'
         created_by: 'Event by'
